@@ -24,9 +24,9 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
  */
 public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 
-	/*List<Movimiento> findByIdClienteAndIdCuenta(Long idCliente, Long idCuenta);
+	List<Movimiento> findByIdCuenta(Long idCuenta);
 
-	@Query(value = "SELECT c FROM Movimiento c WHERE c.cliente.identificacion= :identificacion AND c.cuenta.numero= :numero")
+	/*@Query(value = "SELECT c FROM Movimiento c WHERE c.cliente.identificacion= :identificacion AND c.cuenta.numero= :numero")
 	List<Movimiento> buscarPorClienteCuenta(String identificacion, int numero);
 
 	@Query(value = "SELECT COALESCE(SUM(c.valor),0) FROM Movimiento c WHERE c.cliente.clienteId= :clienteId AND c.cuenta.idCuenta= :idCuenta AND tipoMovimiento= :tipoMovimiento AND CONVERT(c.fecha, DATE) = CONVERT(:fecha, DATE)")

@@ -3,7 +3,15 @@
  */
 package org.ntt.api.cuenta.bancaria.cuenta.controller.dto;
 
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 
@@ -15,17 +23,22 @@ import lombok.Data;
  *          [$Author: Jenny Pucha $, $Date: 20 abr. 2024 $]
  *          </p>
  */
+@JsonInclude(Include.NON_EMPTY)
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class MovimientoEntradaDto {
 
-	private Long idMovimiento;
-	private double saldo;
+
+	@NotEmpty
 	private String tipoMovimiento;
-	private String fecha;
-	private Long idCliente;
-	private Long idCuenta;
+
+	@NotNull
 	private double valor;
-	private String identificacion;
+
+	@NotNull
 	private int numeroCuenta;
 
 }

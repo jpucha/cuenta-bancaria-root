@@ -1,19 +1,17 @@
 /**
- * 
+ *
  */
 package org.ntt.api.cuenta.bancaria.cuenta.service;
 
-import java.util.Date;
 import java.util.List;
-import java.util.Optional;
-
-import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
+import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 
 /**
- * 
+ *
  * <b> Interfaz del servicio para el Movimiento. </b>
- * 
+ *
  * @author Jenny Pucha
  * @version $Revision: 1.0 $
  *          <p>
@@ -21,11 +19,14 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
  *          </p>
  */
 public interface MovimientoService {
-	/*Movimiento create(Movimiento movimiento);
 
-	List<Movimiento> read();
+    Movimiento create(MovimientoEntradaDto movimientoEntradaDto) throws CuentaException;
 
-	Movimiento update(Movimiento movimiento);
+	List<Movimiento> obtenerPorNumeroCuentaPorFecha(int numeroCuenta, String fechaInicio,
+		String fechaFin)
+			throws CuentaException;
+
+	/*Movimiento update(Movimiento movimiento);
 
 	void delete(Long id);
 

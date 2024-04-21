@@ -18,6 +18,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -56,7 +57,7 @@ public class Movimiento implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long idMovimiento;
 
-	@NotBlank
+	@NotNull
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date fecha;
 
@@ -66,13 +67,13 @@ public class Movimiento implements Serializable {
 	@Column(name = "tipo_movimiento")
 	private String tipoMovimiento;
 
-	@NotBlank
+	@NotNull
 	private BigDecimal valor;
 
 	@Column(name = "saldo_anterior")
 	private BigDecimal saldoAnterior;
 
-	@NotBlank
+	@NotNull
 	@Column(name = "id_cuenta")
 	private Long idCuenta;
 

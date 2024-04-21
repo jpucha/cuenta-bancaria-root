@@ -14,13 +14,5 @@ public interface ClienteClientRest {
     @GetMapping("/{identificacion}")
     Optional<ClienteModel> obtenerClientePorIdentificacion(@PathVariable String identificacion);
 
-    @PostMapping("/")
-    ClienteModel crear(@RequestBody ClienteModel usuarioModel);
 
-    /**
-     * Obtiene los datos del cliente dado el cuentaId.
-     * @param ids
-     * @return
-     *
-     @GetMapping("usuarios-por-curso") List<ClienteModel> obtenerAlumnosPorCurso(@RequestParam Long cuentaId);*/
 }
