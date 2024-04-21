@@ -3,10 +3,13 @@
  */
 package org.ntt.api.cuenta.bancaria.cuenta.service.impl;
 
-import java.util.List;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
+import javax.transaction.Transactional;
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
 import org.ntt.api.cuenta.bancaria.cuenta.enumeration.TipoMovimientoEnum;
 import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
@@ -38,19 +41,13 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Autowired
     private CuentaService cuentaService;
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
+    @Transactional
     public Movimiento create(MovimientoEntradaDto movimientoEntradaDto) throws CuentaException {
         try {
-            /*if (ObjectUtils.isEmpty(movimientoEntradaDto.getIdentificacion())
-                || movimientoEntradaDto.getNumeroCuenta() == 0) {
-                throw new CuentaException(
-                    "La identificación y el número de cuenta son obligatorios");
-            }*/
-            /*Optional<ClienteModel> cliente = cuentaService.obtenerClientePorIdentificacion(
-                movimientoEntradaDto.getIdentificacion());
-            if (!cliente.isPresent()) {
-                throw new CuentaException("El cliente no existe con la identificación ingresada.");
-            }*/
             Optional<Cuenta> cuenta = cuentaService.obtenerPorNumeroCuenta(
                 movimientoEntradaDto.getNumeroCuenta());
             if (!cuenta.isPresent()) {
@@ -69,7 +66,7 @@ public class MovimientoServiceImpl implements MovimientoService {
 
             }
             Movimiento movimiento = Movimiento.builder().cuenta(cuenta.get())
-                .idCuenta(cuenta.get().getIdCuenta()).idCuenta(cuenta.get().getIdCuenta())
+                .idCuenta(cuenta.get().getIdCuenta())
                 .valor(BigDecimal.valueOf(Math.abs(movimientoEntradaDto.getValor())))
                 .saldo(saldo).saldoAnterior(cuenta.get().getSaldoInicial())
                 .tipoMovimiento(movimientoEntradaDto.getTipoMovimiento()).fecha(new Date())
@@ -111,12 +108,10 @@ public class MovimientoServiceImpl implements MovimientoService {
     }
 
     /**
-     * Se obtiene todos los metodos
-     * @return
+     * {@inheritDoc}
      */
     @Override
-    public List<Movimiento> obtenerPorNumeroCuentaPorFecha(int numeroCuenta, String fechaInicio,
-        String fechaFin)
+    public List<Movimiento> obtenerPorNumeroCuenta(int numeroCuenta)
         throws CuentaException {
         Optional<Cuenta> cuenta = cuentaService.obtenerPorNumeroCuenta(
             numeroCuenta);
@@ -126,18 +121,68 @@ public class MovimientoServiceImpl implements MovimientoService {
         return movimientoRepository.findByIdCuenta(cuenta.get().getIdCuenta());
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public Movimiento update(MovimientoEntradaDto movimientoEntradaDto) throws CuentaException {
+        try {
+            Optional<Cuenta> cuenta = cuentaService.obtenerPorNumeroCuenta(
+                movimientoEntradaDto.getNumeroCuenta());
+            if (!cuenta.isPresent()) {
+                throw new CuentaException("La cuenta no existe con el número de cuenta ingresado.");
+            }
+
+            List<Movimiento> movimientoList = obtenerPorNumeroCuenta(
+                movimientoEntradaDto.getNumeroCuenta());
+            if (movimientoList.isEmpty()) {
+                throw new CuentaException(
+                    "No existen movimientos a mostrar para el numero de cuenta ingresado.");
+            }
+            // Ordena la lista de movimientos por fecha (de más antiguo a más reciente)
+            Collections.sort(movimientoList, Comparator.comparing(Movimiento::getFecha));
+
+            // Obtiene el último movimiento (el más reciente)
+            Movimiento movimiento = movimientoList.get(movimientoList.size() - 1);
+
+            BigDecimal saldo = new BigDecimal(0);
+            if (TipoMovimientoEnum.CREDITO.getDescripcion()
+                .equalsIgnoreCase(movimientoEntradaDto.getTipoMovimiento())) {
+                saldo = credito(cuenta.get().getSaldoInicial(),
+                    BigDecimal.valueOf(movimientoEntradaDto.getValor()));
+            } else if (TipoMovimientoEnum.DEBITO.getDescripcion()
+                .equalsIgnoreCase(movimientoEntradaDto.getTipoMovimiento())) {
+                saldo = debito(cuenta.get().getSaldoInicial(),
+                    BigDecimal.valueOf(movimientoEntradaDto.getValor()));
+
+            }
+
+            movimiento.setTipoMovimiento(movimientoEntradaDto.getTipoMovimiento());
+            movimiento.setValor(BigDecimal.valueOf(Math.abs(movimientoEntradaDto.getValor())));
+            movimiento.setSaldo(saldo);
+            movimiento.setFecha(new Date());
+
+            //Actualizamos el saldo en al cuenta.
+            cuenta.get().setSaldoInicial(movimiento.getSaldo());
+            cuentaService.update(cuenta.get());
+            return movimientoRepository.save(movimiento);
+        } catch (CuentaException e) {
+            throw new CuentaException(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    @Transactional
+    public void deleteByIdMovimiento(Long id) {
+        movimientoRepository.deleteByIdMovimiento(id);
+
+    }
+
 	/*@Override
-	public Movimiento update(Movimiento movimiento) {
-		return movimientoRepository.save(movimiento);
-	}
-
-	@Override
-	public void delete(Long id) {
-		movimientoRepository.deleteById(id);
-
-	}
-
-	@Override
 	public Optional<Movimiento> obtenerPorId(Long id) {
 
 		return movimientoRepository.findById(id);

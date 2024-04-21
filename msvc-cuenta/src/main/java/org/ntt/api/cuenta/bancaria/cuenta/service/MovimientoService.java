@@ -20,11 +20,35 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
  */
 public interface MovimientoService {
 
+	/**
+	 * Inserta un movimiento.
+	 * @param movimientoEntradaDto
+	 * @return
+	 * @throws CuentaException
+	 */
     Movimiento create(MovimientoEntradaDto movimientoEntradaDto) throws CuentaException;
 
-	List<Movimiento> obtenerPorNumeroCuentaPorFecha(int numeroCuenta, String fechaInicio,
-		String fechaFin)
+	/**
+	 * Obtiene una lista de movimientos dado un numero de cuenta.
+	 * @param numeroCuenta
+	 * @return
+	 * @throws CuentaException
+	 */
+	List<Movimiento> obtenerPorNumeroCuenta(int numeroCuenta)
 			throws CuentaException;
+
+	/**
+	 * Actualiza en movimiento.
+	 * @param movimientoEntradaDto
+	 * @return
+	 */
+	Movimiento update(MovimientoEntradaDto movimientoEntradaDto) throws CuentaException;
+
+	/**
+	 * Elimina un movimiento dado su id.
+	 * @param id
+	 */
+	void deleteByIdMovimiento(Long id);
 
 	/*Movimiento update(Movimiento movimiento);
 

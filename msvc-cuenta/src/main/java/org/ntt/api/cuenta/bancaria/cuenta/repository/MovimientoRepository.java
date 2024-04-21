@@ -7,10 +7,12 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
+import org.springframework.data.repository.query.Param;
 
 /**
  * 
@@ -25,6 +27,10 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 
 	List<Movimiento> findByIdCuenta(Long idCuenta);
+
+	@Modifying
+	@Query(value = "DELETE FROM Movimiento m WHERE m.id_movimiento = :idMovimiento", nativeQuery = true)
+	void deleteByIdMovimiento(@Param("idMovimiento") Long idMovimiento);
 
 	/*@Query(value = "SELECT c FROM Movimiento c WHERE c.cliente.identificacion= :identificacion AND c.cuenta.numero= :numero")
 	List<Movimiento> buscarPorClienteCuenta(String identificacion, int numero);
