@@ -5,6 +5,7 @@ package org.ntt.api.cuenta.bancaria.cuenta.service;
 
 import java.util.List;
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 
@@ -60,8 +61,21 @@ public interface MovimientoService {
 
 	List<Movimiento> obtenerPorIdentificacionNumeroCuenta(String identificacion, int numeroCuenta);
 
-	Double obtenerSumaValorClienteCuentaFecha(Long clienteId, Long idCuenta, String tipoMovimiento, Date fecha);
+	Double obtenerSumaValorClienteCuentaFecha(Long clienteId, Long idCuenta, String tipoMovimiento, Date fecha);*/
 
-	List<ReporteDto> obtenerPorFechas(Date fechaInicial, Date fechaFinal);*/
+	/**
+	 *
+	 * <b> Metodo que genera el reporte por fechas, las mismas estan separadas por
+	 * coma(,) y debe venir en el siguente formato yyyy-MM-dd </b>
+	 * <p>
+	 * [Author: Jenny Pucha, Date: 21 abr. 2024]
+	 * </p>
+	 *
+	 * @param fecha
+	 *            fechas de entrada
+	 * @return ResponseEntity<?> lista o mensaje de error
+	 */
+	List<ReporteDto> generarReporte(String identififcacion, String fecha)
+		throws CuentaException;
 
 }

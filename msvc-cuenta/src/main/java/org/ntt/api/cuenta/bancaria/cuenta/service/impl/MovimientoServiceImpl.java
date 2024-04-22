@@ -4,13 +4,17 @@
 package org.ntt.api.cuenta.bancaria.cuenta.service.impl;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import javax.transaction.Transactional;
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.ntt.api.cuenta.bancaria.cuenta.enumeration.TipoMovimientoEnum;
 import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Cuenta;
@@ -18,8 +22,10 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 import org.ntt.api.cuenta.bancaria.cuenta.repository.MovimientoRepository;
 import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
 import org.ntt.api.cuenta.bancaria.cuenta.service.MovimientoService;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 
 /**
  * <b> Servicio para el Movimiento. </b>
@@ -201,11 +207,35 @@ public class MovimientoServiceImpl implements MovimientoService {
 	@Override
 	public Double obtenerSumaValorClienteCuentaFecha(Long clienteId, Long idCuenta, String tipoMovimiento, Date fecha) {
 		return movimientoRepository.sumaValorPorClienteCuentaFecha(clienteId, idCuenta, tipoMovimiento, fecha);
-	}
-
-	@Override
-	public List<ReporteDto> obtenerPorFechas(Date fechaInicial, Date fechaFinal) {
-		return movimientoRepository.buscarPorEntreFechas(fechaInicial, fechaFinal);
 	}*/
 
+	/**
+     * {@inheritDoc}
+     */
+    public List<ReporteDto> generarReporte(String identififcacion, String fecha)
+        throws CuentaException {
+        try {
+            if (ObjectUtils.isEmpty(fecha)) {
+                throw new CuentaException("Fechas Obligatorias.");
+            }
+            String[] fechas = fecha.split(",");
+            if (fechas.length != 2) {
+                throw new CuentaException("Coloque dos fechas con formato yyyyMMdd separadas como coma (.)");
+            }
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+            Date fechaInicial = formatter.parse(fechas[0]);
+            Date fechaFinal = formatter.parse(fechas[1]);
+            List<ReporteDto> lista = movimientoRepository.obtenerMovimientosPorIdentificacionPorFechas(identififcacion, fechaInicial, fechaFinal);
+            if (ObjectUtils.isEmpty(lista)) {
+                throw new CuentaException("No se encuentra datos con los parametros indicados.");
+            }
+            return lista;
+
+        } catch (CuentaException e) {
+            throw  new CuentaException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+

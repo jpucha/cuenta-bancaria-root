@@ -5,6 +5,7 @@ package org.ntt.api.cuenta.bancaria.cuenta.controller;
 
 import java.util.List;
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
@@ -14,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -85,50 +86,6 @@ public class MovimientoController {
     }
 
     /**
-     *
-     * <b> Metodo para obtiene los movimientos del cliente por su cuenta. </b>
-     * <p>
-     * [Author: Jenny Pucha, Date: 20 abr. 2024]
-     * </p>
-     *
-     * @param movimientoEntradaDto
-     *            parametro de entrada
-     * @return ResponseEntity<?> lista o mensaje de error
-     **
-     @GetMapping public ResponseEntity<?> obtenerMoviemientosPorNumeroCuenta(
-     @RequestBody MovimientoEntradaDto movimientoEntradaDto) {
-     try {
-
-     if (ObjectUtils.isEmpty(movimientoEntradaDto.getIdentificacion())
-     || ObjectUtils.isEmpty(movimientoEntradaDto.getNumeroCuenta())) {
-     return new ResponseEntity<>("La identificación y el número de cuenta son obligatorios",
-     HttpStatus.BAD_REQUEST);
-     }
-     Optional<Cliente> cliente = clienteService
-     .obtenerPorIdentificacion(movimientoEntradaDto.getIdentificacion());
-     if (ObjectUtils.isEmpty(cliente)) {
-     return new ResponseEntity<>("El cliente no existe con la identificación", HttpStatus.BAD_REQUEST);
-     }
-     Optional<Cuenta> cuenta = cuentaService.obtenerPorNumeroCuenta(movimientoEntradaDto.getNumeroCuenta());
-     if (ObjectUtils.isEmpty(cuenta)) {
-     return new ResponseEntity<>("La cuenta no existe con el número de cuenta", HttpStatus.BAD_REQUEST);
-     }
-
-     List<Movimiento> listadoMovimiento = service.obtenerPorClienteCuenta(cliente.get().getClienteId(),
-     cuenta.get().getIdCuenta());
-     if (null == listadoMovimiento || listadoMovimiento.isEmpty()) {
-     return new ResponseEntity<>("No existen movimientos con lo parametros indicados.", HttpStatus.OK);
-     } else {
-     return new ResponseEntity<List<Movimiento>>(listadoMovimiento, HttpStatus.OK);
-     }
-
-     } catch (Exception e) {
-     log.error("Por favor comuniquese con el administrador", e);
-     return new ResponseEntity<>("Por favor comuniquese con el administrador", HttpStatus.INTERNAL_SERVER_ERROR);
-     }
-     }*/
-
-    /**
      * <b> Metodo que actualiza el movimiento. </b>
      * <p>
      * [Author: Jenny Pucha, Date: 20 abr. 2024]
@@ -167,4 +124,27 @@ public class MovimientoController {
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    /**
+     * <b> Metodo que genera el reporte por fechas, la fecha(yyyy-MM-dd) esta separada por
+     * coma(,). </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 21 abr. 2024]
+     * </p>
+     *
+     * @param fecha fechas de entrada
+     * @return ResponseEntity<?> lista o mensaje de error
+     **/
+    @GetMapping(value = "/reportes")
+    public ResponseEntity<?> generarReporte(@RequestParam String identificacion,
+        @RequestParam String fecha) {
+        try {
+            return new ResponseEntity<List<ReporteDto>>(service.generarReporte(identificacion, fecha),
+            HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getCause().getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

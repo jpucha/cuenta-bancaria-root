@@ -6,11 +6,11 @@ package org.ntt.api.cuenta.bancaria.cuenta.repository;
 import java.util.Date;
 import java.util.List;
 
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
-import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
 import org.springframework.data.repository.query.Param;
 
@@ -32,16 +32,14 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 	@Query(value = "DELETE FROM Movimiento m WHERE m.id_movimiento = :idMovimiento", nativeQuery = true)
 	void deleteByIdMovimiento(@Param("idMovimiento") Long idMovimiento);
 
-	/*@Query(value = "SELECT c FROM Movimiento c WHERE c.cliente.identificacion= :identificacion AND c.cuenta.numero= :numero")
-	List<Movimiento> buscarPorClienteCuenta(String identificacion, int numero);
-
-	@Query(value = "SELECT COALESCE(SUM(c.valor),0) FROM Movimiento c WHERE c.cliente.clienteId= :clienteId AND c.cuenta.idCuenta= :idCuenta AND tipoMovimiento= :tipoMovimiento AND CONVERT(c.fecha, DATE) = CONVERT(:fecha, DATE)")
-	Double sumaValorPorClienteCuentaFecha(Long clienteId, Long idCuenta, String tipoMovimiento, Date fecha);
-
-	@Query(value = "SELECT CONVERT(m.fecha, DATE) as fecha, cl.nombre, cu.numero, cu.tipo_cuenta as tipoCuenta,  m.saldo_anterior as saldoAnterior, cu.estado, m.valor, m.saldo "
-			+ "FROM cuentabancaria.movimiento m, cuentabancaria.cuenta cu, cuentabancaria.cliente cl "
-			+ "where m.id_cliente = cl.cliente_Id and m.id_cuenta = cu.id_cuenta and cu.id_cliente = cl.cliente_Id "
-			+ "and CONVERT(m.fecha, DATE) between CONVERT(:fechaInicial, DATE) AND CONVERT(:fechaFinal, DATE)", nativeQuery = true)
-	List<ReporteDto> buscarPorEntreFechas(Date fechaInicial, Date fechaFinal);*/
+	@Query(value = "SELECT CAST(m.fecha AS DATE) as fecha, cl.nombre as cliente, "
+		+ " cu.numero_cuenta as numeroCuenta, cu.tipo_cuenta as tipo, "
+			+ " m.saldo_anterior as saldoInicial, cu.estado, m.valor as movimiento, "
+		+ " m.saldo as saldoDisponible "
+			+ "FROM movimiento m, cuenta cu, cliente cl "
+			+ "where cu.id_cliente = cl.cliente_Id and m.id_cuenta = cu.id_cuenta "
+			+ "and CAST(m.fecha AS DATE) between CAST(:fechaInicial AS DATE) AND CAST(:fechaFinal AS DATE) "
+		+ "and cl.identificacion = :identificacion order by m.fecha desc", nativeQuery = true)
+	List<ReporteDto> obtenerMovimientosPorIdentificacionPorFechas(String identificacion, Date fechaInicial, Date fechaFinal);
 
 }

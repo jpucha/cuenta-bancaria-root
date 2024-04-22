@@ -3,7 +3,6 @@
  */
 package org.ntt.api.cuenta.bancaria.cliente;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = MsvcClienteApplication.class)
 @TestMethodOrder(OrderAnnotation.class)
-public class TestCliente {
+public class ClienteTestIntegracion {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
@@ -44,7 +43,8 @@ public class TestCliente {
 	@Autowired
 	private ObjectMapper mapper;
 
-	@Ignore
+
+	@Test
 	@Order(1)
 	public void post_createNewClient_Returns_201_Created() throws JsonProcessingException {
 		Cliente cliente = new Cliente();
