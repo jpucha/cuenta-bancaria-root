@@ -74,7 +74,7 @@ public class ClienteController {
 			}
 		} catch (Exception e) {
 			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>("Por favor comuniquese con el administrador", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -101,7 +101,7 @@ public class ClienteController {
 			}
 		} catch (Exception e) {
 			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>("Por favor comuniquese con el administrador", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
@@ -173,7 +173,7 @@ public class ClienteController {
 					HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
 			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>("Por favor comuniquese con el administrador", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 

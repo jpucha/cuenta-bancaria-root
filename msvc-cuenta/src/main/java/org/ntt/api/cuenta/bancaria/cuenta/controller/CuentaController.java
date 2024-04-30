@@ -86,7 +86,11 @@ public class CuentaController {
 
         } catch (Exception e) {
             log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>("Por favor comuniquese con el administrador.",
+            if(e.getLocalizedMessage().contains("400")){
+                return new ResponseEntity<>("Cliente no encontrado.",
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+            return new ResponseEntity<>(e.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -121,7 +125,7 @@ public class CuentaController {
 
         } catch (Exception e) {
             log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>("Por favor comuniquese con el administrador",
+            return new ResponseEntity<>(e.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -160,7 +164,7 @@ public class CuentaController {
 
         } catch (Exception e) {
             log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>("Por favor comuniquese con el administrador",
+            return new ResponseEntity<>(e.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -188,7 +192,7 @@ public class CuentaController {
 
         } catch (Exception e) {
             log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>("Por favor comuniquese con el administrador",
+            return new ResponseEntity<>(e.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

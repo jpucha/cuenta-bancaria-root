@@ -35,7 +35,7 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
 	@Query(value = "SELECT CAST(m.fecha AS DATE) as fecha, cl.nombre as cliente, "
 		+ " cu.numero_cuenta as numeroCuenta, cu.tipo_cuenta as tipo, "
 			+ " m.saldo_anterior as saldoInicial, cu.estado, m.valor as movimiento, "
-		+ " m.saldo as saldoDisponible "
+		+ " m.saldo as saldoDisponible, m.tipo_movimiento as tipoMovimiento "
 			+ "FROM movimiento m, cuenta cu, cliente cl "
 			+ "where cu.id_cliente = cl.cliente_Id and m.id_cuenta = cu.id_cuenta "
 			+ "and CAST(m.fecha AS DATE) between CAST(:fechaInicial AS DATE) AND CAST(:fechaFinal AS DATE) "

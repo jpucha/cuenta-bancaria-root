@@ -78,11 +78,15 @@ public class MovimientoController {
      * @return ResponseEntity<?> lista o mensaje de error
      **/
     @GetMapping(path = "/{numeroCuenta}")
-    public ResponseEntity<?> obtenerPorNumeroCuentaPorFecha(@PathVariable int numeroCuenta)
+    public ResponseEntity<?> obtenerPorNumeroCuenta(@PathVariable int numeroCuenta)
         throws CuentaException {
-
-        return new ResponseEntity<List<Movimiento>>(service.obtenerPorNumeroCuenta(numeroCuenta),
-            HttpStatus.OK);
+        try {
+            return new ResponseEntity<List<Movimiento>>(service.obtenerPorNumeroCuenta(numeroCuenta),
+                HttpStatus.OK);
+        }catch (Exception e){
+            return new ResponseEntity<>(e.getLocalizedMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -120,7 +124,7 @@ public class MovimientoController {
 
         } catch (Exception e) {
             log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>("Por favor comuniquese con el administrador",
+            return new ResponseEntity<>(e.getCause().getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -142,7 +146,7 @@ public class MovimientoController {
             return new ResponseEntity<List<ReporteDto>>(service.generarReporte(identificacion, fecha),
             HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(e.getCause().getMessage(),
+            return new ResponseEntity<>(e.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

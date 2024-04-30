@@ -38,4 +38,6 @@ public interface ReporteDto {
 
     public BigDecimal getSaldoDisponible();
 
+    public String getTipoMovimiento();
+
 }

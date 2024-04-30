@@ -36,7 +36,7 @@ public class MovimientoTest {
     @Test
     void whenObtenerPorNumeroCuentaThenNotNull(){
         int numeroCuenta = 2200220;
-        ResponseEntity<?> respuesta = movimientoController.obtenerPorNumeroCuentaPorFecha(numeroCuenta);
+        ResponseEntity<?> respuesta = movimientoController.obtenerPorNumeroCuenta(numeroCuenta);
         assertNotNull(respuesta);
 
     }
@@ -48,7 +48,7 @@ public class MovimientoTest {
         List<Movimiento> lista = new ArrayList<>();
         lista.add(Movimiento.builder().cuenta(Cuenta.builder().idCuenta(1l).numeroCuenta(numeroCuenta).build()).build());
         when(service.obtenerPorNumeroCuenta(numeroCuenta)).thenReturn(lista);
-        ResponseEntity<List<Movimiento>> respuesta = (ResponseEntity<List<Movimiento>>) movimientoController.obtenerPorNumeroCuentaPorFecha(numeroCuenta);
+        ResponseEntity<List<Movimiento>> respuesta = (ResponseEntity<List<Movimiento>>) movimientoController.obtenerPorNumeroCuenta(numeroCuenta);
         assertEquals(respuesta.getBody().get(0).getCuenta().getNumeroCuenta(),numeroCuenta);
 
     }
