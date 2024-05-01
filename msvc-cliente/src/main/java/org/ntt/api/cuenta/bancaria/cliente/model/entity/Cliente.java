@@ -7,14 +7,16 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQuery;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 /**
@@ -31,7 +33,8 @@ import org.hibernate.annotations.DynamicUpdate;
 @NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c")
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class Cliente extends Persona implements Serializable {
@@ -51,7 +54,7 @@ public class Cliente extends Persona implements Serializable {
     @Column(name = "cliente_Id")
     private Long clienteId;
 
-    @NotNull
+    @NotBlank
     private String contrasena;
 
     private String estado;

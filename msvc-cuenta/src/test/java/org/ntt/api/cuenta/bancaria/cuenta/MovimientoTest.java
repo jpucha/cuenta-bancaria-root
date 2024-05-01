@@ -1,55 +1,57 @@
 package org.ntt.api.cuenta.bancaria.cuenta;
 
-import lombok.SneakyThrows;
+import static org.mockito.Mockito.when;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ntt.api.cuenta.bancaria.cuenta.controller.MovimientoController;
+import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Cuenta;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
+import org.ntt.api.cuenta.bancaria.cuenta.repository.CuentaRepository;
 import org.ntt.api.cuenta.bancaria.cuenta.repository.MovimientoRepository;
-import org.ntt.api.cuenta.bancaria.cuenta.service.MovimientoService;
-import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
+import org.ntt.api.cuenta.bancaria.cuenta.service.impl.MovimientoServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 public class MovimientoTest {
 
     @InjectMocks
-    MovimientoController movimientoController;
-
-    @Mock
-    MovimientoService service;
+    MovimientoServiceImpl movimientoService;
 
     @Mock
     MovimientoRepository movimientoRepository;
 
-    @SneakyThrows
+    @Mock
+    private CuentaRepository cuentaRepository;
+
     @Test
-    void whenObtenerPorNumeroCuentaThenNotNull(){
-        int numeroCuenta = 2200220;
-        ResponseEntity<?> respuesta = movimientoController.obtenerPorNumeroCuenta(numeroCuenta);
-        assertNotNull(respuesta);
+    void whenObtenerPorNumeroCuentaThenNotNull() throws CuentaException {
+        Movimiento movimientoEsperado_uno = Movimiento.builder().idMovimiento(1L).idCuenta(1L)
+            .tipoMovimiento("credito").valor(BigDecimal.valueOf(100L))
+            .saldo(BigDecimal.valueOf(1100L)).saldoAnterior(BigDecimal.valueOf(1000L)).build();
+        Movimiento movimientoEsperado_dos = Movimiento.builder().idMovimiento(1L).idCuenta(1L)
+            .tipoMovimiento("debito").valor(BigDecimal.valueOf(100L))
+            .saldo(BigDecimal.valueOf(1000L)).saldoAnterior(BigDecimal.valueOf(1100L)).build();
+        List<Movimiento> listaMovimientoEsperado = new ArrayList<>();
+        listaMovimientoEsperado.add(movimientoEsperado_uno);
+        listaMovimientoEsperado.add(movimientoEsperado_dos);
 
-    }
+        Cuenta cuentaEsperada = Cuenta.builder().numeroCuenta(456789).idCuenta(1L).idCliente(1L).
+            tipoCuenta("Ahorros").saldoInicial(BigDecimal.valueOf(1000L)).estado("True").build();
 
-    @SneakyThrows
-    @Test
-    void whenObtenerPorNumeroCuentaThenEqualNumeroCuenta(){
-        int numeroCuenta = 2200220;
-        List<Movimiento> lista = new ArrayList<>();
-        lista.add(Movimiento.builder().cuenta(Cuenta.builder().idCuenta(1l).numeroCuenta(numeroCuenta).build()).build());
-        when(service.obtenerPorNumeroCuenta(numeroCuenta)).thenReturn(lista);
-        ResponseEntity<List<Movimiento>> respuesta = (ResponseEntity<List<Movimiento>>) movimientoController.obtenerPorNumeroCuenta(numeroCuenta);
-        assertEquals(respuesta.getBody().get(0).getCuenta().getNumeroCuenta(),numeroCuenta);
-
+        List<Movimiento> respuestaActual;
+        when(this.cuentaRepository.findByNumeroCuenta(456789)).thenReturn(
+            Optional.ofNullable(cuentaEsperada));
+        when(this.movimientoRepository.findByIdCuenta(1L)).thenReturn(listaMovimientoEsperado);
+        respuestaActual = this.movimientoService.obtenerPorNumeroCuenta(456789);
+        Assert.assertNotNull(respuestaActual);
     }
 }

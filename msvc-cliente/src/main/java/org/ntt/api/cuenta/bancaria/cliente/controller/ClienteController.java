@@ -1,16 +1,19 @@
 /**
- * 
+ *
  */
 package org.ntt.api.cuenta.bancaria.cliente.controller;
 
-import java.util.Optional;
-
+import java.util.HashMap;
+import java.util.Map;
+import javax.validation.Valid;
+import org.ntt.api.cuenta.bancaria.cliente.controller.dto.entrada.ClienteEntradaDto;
+import org.ntt.api.cuenta.bancaria.cliente.service.ClienteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,160 +24,146 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.ntt.api.cuenta.bancaria.cliente.controller.dto.ClienteEntradaDto;
-import org.ntt.api.cuenta.bancaria.cliente.model.entity.Cliente;
-import org.ntt.api.cuenta.bancaria.cliente.service.ClienteService;
-
 /**
- * 
  * <b> Clase controlador de los clientes. </b>
- * 
+ *
  * @author Jenny Pucha
  * @version $Revision: 1.0 $
- *          <p>
- *          [$Author: Jenny Pucha $, $Date: 21 abr. 2024 $]
- *          </p>
+ *     <p>
+ *     [$Author: Jenny Pucha $, $Date: 21 abr. 2024 $]
+ *     </p>
  */
 @RestController
 @RequestMapping("/api/clientes")
 public class ClienteController {
-	private static final Logger log = LoggerFactory.getLogger(ClienteController.class);
 
-	@Autowired
-	private ClienteService service;
+    private static final Logger log = LoggerFactory.getLogger(ClienteController.class);
+    private static final String ERROR_MN = "Ha ocurrido un error {}";
 
-	/**
-	 * 
-	 * <b> Metodo que crea un cliente. </b>
-	 * <p>
-	 * [Author: Jenny Pucha, Date: 19 abr. 2024]
-	 * </p>
-	 *
-	 * @param clienteEntradaDto
-	 *            parametro de entrada
-	 * @return ResponseEntity<?> lista o mensaje de error
-	 */
-	@PostMapping
-	public ResponseEntity<?> create(@Validated @RequestBody ClienteEntradaDto clienteEntradaDto) {
-		try {
+    @Autowired
+    private ClienteService service;
 
-			Optional<Cliente> clienteEncontrado = service
-					.obtenerPorIdentificacion(clienteEntradaDto.getIdentificacion());
-			if (clienteEncontrado.isPresent()) {
-				return new ResponseEntity<>(
-						"Cliente ya se encuentra registrado es estado: " + clienteEncontrado.get().getEstado(),
-						HttpStatus.BAD_REQUEST);
-			} else {
-				Cliente cliente = Cliente.builder().direccion(clienteEntradaDto.getDireccion()).edad(clienteEntradaDto.getEdad())
-					.genero(clienteEntradaDto.getGenero()).identificacion(clienteEntradaDto.getIdentificacion()).nombre(clienteEntradaDto.getNombre())
-					.telefono(clienteEntradaDto.getTelefono()).contrasena(clienteEntradaDto.getContrasena()).estado(Boolean.TRUE.toString()).build();
+    /**
+     * <b> Metodo que crea un cliente. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param clienteEntradaDto parametro de entrada
+     * @return ResponseEntity<?> objeto o mensaje de error
+     */
+    @PostMapping
+    public ResponseEntity<?> guardar(@Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
+        BindingResult resultado) {
+        try {
+            if (resultado.hasErrors()) {
+                return validar(resultado);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(clienteEntradaDto));
+        } catch (Exception e) {
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+        }
+    }
 
-				Cliente clienteGuardado = service.create(cliente);
-				return new ResponseEntity<Cliente>(clienteGuardado, HttpStatus.CREATED);
-			}
-		} catch (Exception e) {
-			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+    /**
+     * <b> Metodo para tratar los errores de validaciones de los datos de entrada. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param resultado parametro de entrada
+     * @return ResponseEntity<?> lista o mensaje de error
+     */
+    private static ResponseEntity<Map<String, String>> validar(
+        BindingResult resultado) {
+        Map<String, String> errores = new HashMap<>();
+        resultado.getFieldErrors().forEach(error -> {
+            errores.put(error.getField(),
+                "El campo " + error.getField() + " " + error.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errores);
+    }
 
-	/**
-	 * 
-	 * <b> Metodo para obtiene un cliente por su identidicacion. </b>
-	 * <p>
-	 * [Author: Jenny Pucha, Date: 19 abr. 2024]
-	 * </p>
-	 *
-	 * @param identificacion
-	 *            parametro de entrada
-	 * @return ResponseEntity<?> lista o mensaje de error
-	 */
-	@GetMapping(path = "/{identificacion}")
-	public ResponseEntity<?> obtenerClientePorIdentificacion(@Validated @PathVariable String identificacion) {
-		try {
-			Optional<Cliente> clienteEncontrado = service
-					.obtenerPorIdentificacion(identificacion);
-			if (clienteEncontrado.isPresent()) {
-				return new ResponseEntity<Cliente>(clienteEncontrado.get(), HttpStatus.OK);
-			} else {
-				return new ResponseEntity<>("No existe clientes con el parametro", HttpStatus.BAD_REQUEST);
-			}
-		} catch (Exception e) {
-			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+    /**
+     * <b> Metodo para obtiene un cliente por su identificacion. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param identificacion parametro de entrada
+     * @return ResponseEntity<?> objeto o mensaje de error
+     */
+    @GetMapping(path = "/{identificacion}")
+    public ResponseEntity<?> obtenerClientePorIdentificacion(@PathVariable String identificacion) {
+        try {
+            return ResponseEntity.ok().body(service.obtenerPorIdentificacion(identificacion));
+        } catch (Exception e) {
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+        }
+    }
 
-	/**
-	 * 
-	 * <b> Metodo que actualiza un cliente. </b>
-	 * <p>
-	 * [Author: Jenny Pucha, Date: 19 abr. 2024]
-	 * </p>
-	 *
-	 * @param clienteEntradaDto
-	 *            parametro de entrada
-	 * @return ResponseEntity<?> lista o mensaje de error
-	 */
-	@PutMapping
-	public ResponseEntity<?> update(@Validated @RequestBody ClienteEntradaDto clienteEntradaDto) {
-		try {
-			Optional<Cliente> clienteEncontrado = null;
-			if (!ObjectUtils.isEmpty(clienteEntradaDto.getIdentificacion())) {
-				clienteEncontrado = service.obtenerPorIdentificacion(clienteEntradaDto.getIdentificacion());
-			} else {
-				clienteEncontrado = service.obtenerPorId(clienteEntradaDto.getIdCliente());
-			}
+    /**
+     * <b> Metodo para obtiene todos los clientes </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @return ResponseEntity<?> lista o mensaje de error
+     */
+    @GetMapping()
+    public ResponseEntity<?> obtenerTodosClientes() {
+        try {
+            return ResponseEntity.ok().body(service.read());
+        } catch (Exception e) {
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+        }
+    }
 
-			if (null != clienteEncontrado && clienteEncontrado.isPresent()) {
-				Cliente cliente = clienteEncontrado.get();
-				cliente.setNombre(clienteEntradaDto.getNombre());
-				cliente.setGenero(clienteEntradaDto.getGenero());
-				cliente.setEdad(clienteEntradaDto.getEdad());
-				cliente.setIdentificacion(clienteEntradaDto.getIdentificacion());
-				cliente.setDireccion(clienteEntradaDto.getDireccion());
-				cliente.setTelefono(clienteEntradaDto.getTelefono());
-				cliente.setContrasena(clienteEntradaDto.getContrasena());
-				cliente.setEstado(clienteEntradaDto.getEstado());
-				Cliente clienteGuardado = service.update(cliente);
-				return new ResponseEntity<Cliente>(clienteGuardado, HttpStatus.OK);
+    /**
+     * <b> Metodo que actualiza un cliente. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param clienteEntradaDto parametro de entrada
+     * @return ResponseEntity<?> objeto o mensaje de error
+     */
+    @PutMapping
+    public ResponseEntity<?> actualizar(@Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
+        BindingResult resultado) {
+        try {
+            if (resultado.hasErrors()) {
+                return validar(resultado);
+            }
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.update(clienteEntradaDto));
+        } catch (Exception e) {
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+        }
+    }
 
-			} else {
-				return new ResponseEntity<>("Cliente no se encuentra registrado", HttpStatus.CREATED);
-			}
-		} catch (Exception e) {
-			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>("Por favor comuniquese con el administrador", HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-	/**
-	 * 
-	 * <b> Metodo que elimina un registro por su id. </b>
-	 * <p>
-	 * [Author: Jenny Pucha, Date: 19 abr. 2024]
-	 * </p>
-	 *
-	 * @param id
-	 *            parametro de entrada
-	 * @return ResponseEntity<?> lista o mensaje de error
-	 */
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> delete(@PathVariable("id") Long id) {
-		try {
-
-			Optional<Cliente> personaEncontrada = service.obtenerPorId(id);
-			if (personaEncontrada.isPresent()) {
-				service.delete(id);
-				return new ResponseEntity<>("Registro Eliminado", HttpStatus.OK);
-			}
-			return new ResponseEntity<String>(
-					"No se puede eliminar el registro con id: " + id + " no existe el registro",
-					HttpStatus.BAD_REQUEST);
-		} catch (Exception e) {
-			log.error("Por favor comuniquese con el administrador", e);
-			return new ResponseEntity<>(e.getCause().getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
+    /**
+     * <b> Metodo que elimina un registro por su id. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param identificacion parametro de entrada
+     * @return ResponseEntity<?> mensaje de error
+     */
+    @DeleteMapping("/{identificacion}")
+    public ResponseEntity<?> eliminar(@PathVariable("identificacion") String identificacion) {
+        try {
+            service.delete(identificacion);
+            return ResponseEntity.ok().body("Registro Eliminado");
+        } catch (Exception e) {
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+        }
+    }
 }

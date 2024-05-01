@@ -26,7 +26,9 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.DynamicUpdate;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -43,7 +45,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
+@Setter
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

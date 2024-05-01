@@ -1,15 +1,18 @@
 /**
  * 
  */
-package org.ntt.api.cuenta.bancaria.cliente.controller.dto;
+package org.ntt.api.cuenta.bancaria.cliente.controller.dto.entrada;
 
+import javax.validation.constraints.NotBlank;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * 
@@ -23,28 +26,33 @@ import lombok.NoArgsConstructor;
  */
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClienteEntradaDto {
 
+	@NotBlank
 	private String identificacion;
 
+	@NotBlank
 	private String contrasena;
 
+	@NotBlank
 	private String estado;
 
+	@NotBlank
 	private String direccion;
 
 	private int edad;
 
 	private String genero;
 
+	@NotBlank
 	private String nombre;
 
+	@NotBlank
 	private String telefono;
-
-	private Long idCliente;
 
 }
