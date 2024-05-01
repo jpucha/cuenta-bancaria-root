@@ -96,8 +96,7 @@ public class ClienteController {
      * @return ResponseEntity<?> objeto o mensaje de error
      */
     @GetMapping(path = "/{identificacion}")
-    public ResponseEntity<?> obtenerClientePorIdentificacion(
-        @Validated @PathVariable String identificacion) {
+    public ResponseEntity<?> obtenerClientePorIdentificacion(@PathVariable String identificacion) {
         try {
             return ResponseEntity.ok().body(service.obtenerPorIdentificacion(identificacion));
         } catch (Exception e) {

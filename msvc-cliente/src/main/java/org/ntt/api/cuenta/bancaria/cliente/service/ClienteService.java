@@ -29,7 +29,7 @@ public interface ClienteService {
      *
      * @param clienteEntradaDto parametro de entrada
      * @return Cliente objeto o mensaje de error
-     * @throws ClienteException signals that an CdcApiException has occurred.
+     * @throws @throws ClienteException indica que ha ocurrido una excepcion.
      */
     Cliente create(ClienteEntradaDto clienteEntradaDto) throws ClienteException;
 
@@ -51,7 +51,7 @@ public interface ClienteService {
      *
      * @param clienteEntradaDto parametro de entrada
      * @return Cliente objeto o mensaje de error
-     * @throws ClienteException signals that an CdcApiException has occurred.
+     * @throws ClienteException indica que ha ocurrido una excepcion.
      */
     Cliente update(ClienteEntradaDto clienteEntradaDto) throws ClienteException;
 
@@ -61,8 +61,8 @@ public interface ClienteService {
      * [Author: Jenny Pucha, Date: 19 abr. 2024]
      * </p>
      *
-     * @param identificacion parametro de entrada
-     * @throws ClienteException signals that an CdcApiException has occurred.
+     * @param identificacion parametro de entrada.
+     * @throws ClienteException indica que ha ocurrido una excepcion.
      */
     void delete(String identificacion) throws ClienteException;
 
@@ -72,8 +72,9 @@ public interface ClienteService {
      * [Author: Jenny Pucha, Date: 19 abr. 2024]
      * </p>
      *
-     * @param identificacion parametro de entrada
-     * @return Optional<Cliente> objeto o mensaje de error
+     * @param identificacion parametro de entrada.
+     * @return Optional<Cliente> objeto o mensaje de error.
+     * @throws ClienteException indica que ha ocurrido una excepcion.
      */
     Optional<Cliente> obtenerPorIdentificacion(String identificacion) throws ClienteException;
 

@@ -11,18 +11,17 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.logging.Logger;
 import javax.transaction.Transactional;
-import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.MovimientoEntradaDto;
 import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.ReporteDto;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.entrada.MovimientoEntradaDto;
 import org.ntt.api.cuenta.bancaria.cuenta.enumeration.TipoMovimientoEnum;
 import org.ntt.api.cuenta.bancaria.cuenta.exception.CuentaException;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Cuenta;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Movimiento;
+import org.ntt.api.cuenta.bancaria.cuenta.repository.CuentaRepository;
 import org.ntt.api.cuenta.bancaria.cuenta.repository.MovimientoRepository;
 import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
 import org.ntt.api.cuenta.bancaria.cuenta.service.MovimientoService;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
@@ -43,6 +42,9 @@ public class MovimientoServiceImpl implements MovimientoService {
 
     @Autowired
     private MovimientoRepository movimientoRepository;
+
+    @Autowired
+    private CuentaRepository cuentaRepository;
 
     @Autowired
     private CuentaService cuentaService;
@@ -79,7 +81,7 @@ public class MovimientoServiceImpl implements MovimientoService {
                 .build();
             //Actualizamos el saldo en al cuenta.
             cuenta.get().setSaldoInicial(movimiento.getSaldo());
-            cuentaService.update(cuenta.get());
+            cuentaRepository.save(cuenta.get());
             return movimientoRepository.save(movimiento);
         } catch (CuentaException e) {
             throw new CuentaException(e);
@@ -119,12 +121,16 @@ public class MovimientoServiceImpl implements MovimientoService {
     @Override
     public List<Movimiento> obtenerPorNumeroCuenta(int numeroCuenta)
         throws CuentaException {
-        Optional<Cuenta> cuenta = cuentaService.obtenerPorNumeroCuenta(
-            numeroCuenta);
-        if (!cuenta.isPresent()) {
-            throw new CuentaException("La cuenta no existe con el número de cuenta ingresado.");
+        try {
+            Optional<Cuenta> cuenta = cuentaRepository.findByNumeroCuenta(
+                numeroCuenta);
+            if (!cuenta.isPresent()) {
+                throw new CuentaException("La cuenta no existe con el número de cuenta ingresado.");
+            }
+            return movimientoRepository.findByIdCuenta(cuenta.get().getIdCuenta());
+        }catch (CuentaException e){
+            throw new CuentaException(e);
         }
-        return movimientoRepository.findByIdCuenta(cuenta.get().getIdCuenta());
     }
 
     /**
@@ -169,9 +175,9 @@ public class MovimientoServiceImpl implements MovimientoService {
             movimiento.setSaldo(saldo);
             movimiento.setFecha(new Date());
 
-            //Actualizamos el saldo en al cuenta.
+            //Actualizamos el saldo en la cuenta.
             cuenta.get().setSaldoInicial(movimiento.getSaldo());
-            cuentaService.update(cuenta.get());
+            cuentaRepository.save(cuenta.get());
             return movimientoRepository.save(movimiento);
         } catch (CuentaException e) {
             throw new CuentaException(e);
@@ -183,56 +189,45 @@ public class MovimientoServiceImpl implements MovimientoService {
      */
     @Override
     @Transactional
-    public void deleteByIdMovimiento(Long id) {
-        movimientoRepository.deleteByIdMovimiento(id);
-
+    public void deleteByIdMovimiento(Long id) throws CuentaException {
+        try {
+            Optional<Movimiento> movimiento = movimientoRepository.findById(id);
+            if (!movimiento.isPresent()) {
+                throw new CuentaException(
+                    "No se puede eliminar el registro con id: " + id + " no existe.");
+            }
+            movimientoRepository.deleteByIdMovimiento(movimiento.get().getIdMovimiento());
+        } catch (CuentaException e) {
+            throw new CuentaException(e);
+        }
     }
 
-	/*@Override
-	public Optional<Movimiento> obtenerPorId(Long id) {
-
-		return movimientoRepository.findById(id);
-	}
-
-	@Override
-	public List<Movimiento> obtenerPorClienteCuenta(Long idCliente, Long idCuenta) {
-		return movimientoRepository.findByIdClienteAndIdCuenta(idCliente, idCuenta);
-	}
-
-	@Override
-	public List<Movimiento> obtenerPorIdentificacionNumeroCuenta(String identificacion, int numeroCuenta) {
-		return movimientoRepository.buscarPorClienteCuenta(identificacion, numeroCuenta);
-	}
-
-	@Override
-	public Double obtenerSumaValorClienteCuentaFecha(Long clienteId, Long idCuenta, String tipoMovimiento, Date fecha) {
-		return movimientoRepository.sumaValorPorClienteCuentaFecha(clienteId, idCuenta, tipoMovimiento, fecha);
-	}*/
-
-	/**
+    /**
      * {@inheritDoc}
      */
     public List<ReporteDto> generarReporte(String identififcacion, String fecha)
-        throws CuentaException {
+        throws CuentaException, RuntimeException {
         try {
             if (ObjectUtils.isEmpty(fecha)) {
                 throw new CuentaException("Fechas Obligatorias.");
             }
             String[] fechas = fecha.split(",");
             if (fechas.length != 2) {
-                throw new CuentaException("Coloque dos fechas con formato yyyyMMdd separadas como coma (.)");
+                throw new CuentaException(
+                    "Coloque dos fechas con formato yyyyMMdd separadas como coma (.)");
             }
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
             Date fechaInicial = formatter.parse(fechas[0]);
             Date fechaFinal = formatter.parse(fechas[1]);
-            List<ReporteDto> lista = movimientoRepository.obtenerMovimientosPorIdentificacionPorFechas(identififcacion, fechaInicial, fechaFinal);
+            List<ReporteDto> lista = movimientoRepository.obtenerMovimientosPorIdentificacionPorFechas(
+                identififcacion, fechaInicial, fechaFinal);
             if (ObjectUtils.isEmpty(lista)) {
                 throw new CuentaException("No se encuentra datos con los parametros indicados.");
             }
             return lista;
 
         } catch (CuentaException e) {
-            throw  new CuentaException(e);
+            throw new CuentaException(e);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

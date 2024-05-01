@@ -1,12 +1,13 @@
-package org.ntt.api.cuenta.bancaria.cuenta.controller.dto;
+package org.ntt.api.cuenta.bancaria.cuenta.controller.dto.salida;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  *
@@ -20,11 +21,12 @@ import lombok.NoArgsConstructor;
  */
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Data
+@Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class CuentaResponseDto {
+public class CuentaSalidaDto {
 
     private Long idCuenta;
     private String identificacion;

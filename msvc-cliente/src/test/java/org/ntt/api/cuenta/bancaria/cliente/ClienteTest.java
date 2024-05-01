@@ -12,7 +12,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.ntt.api.cuenta.bancaria.cliente.exception.ClienteException;
 import org.ntt.api.cuenta.bancaria.cliente.model.entity.Cliente;
 import org.ntt.api.cuenta.bancaria.cliente.repository.ClienteRepository;
-import org.ntt.api.cuenta.bancaria.cliente.service.ClienteService;
 import org.ntt.api.cuenta.bancaria.cliente.service.impl.ClienteServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,18 +38,5 @@ public class ClienteTest {
             throw new ClienteException(e);
         }
         Assert.assertEquals(Optional.ofNullable(clienteSalidaEsperada), actualRespuesta);
-    }
-
-    @Ignore
-    void whenObtenerClientePorIdentificacionThenEqualsIdentificacion() throws ClienteException {
-        String identificacion = "1234567890";
-        Optional<Cliente> cliente = Optional.of(
-            Cliente.builder().identificacion(identificacion).build());
-
-        //when(service.obtenerPorIdentificacion(identificacion)).thenReturn(cliente);
-        //ResponseEntity<Cliente> respuesta = (ResponseEntity<Cliente>) clienteController.obtenerClientePorIdentificacion(
-        //identificacion);
-        //assertEquals(respuesta.getBody().getIdentificacion(), identificacion);
-
     }
 }

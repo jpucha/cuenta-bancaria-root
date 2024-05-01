@@ -1,57 +1,44 @@
 package org.ntt.api.cuenta.bancaria.cuenta;
 
+import static org.mockito.Mockito.when;
+import java.math.BigDecimal;
+import java.util.Optional;
+import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.ntt.api.cuenta.bancaria.cuenta.controller.CuentaController;
-import org.ntt.api.cuenta.bancaria.cuenta.model.ClienteModel;
+import org.ntt.api.cuenta.bancaria.cuenta.clients.ClienteClientRest;
 import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Cuenta;
 import org.ntt.api.cuenta.bancaria.cuenta.repository.CuentaRepository;
-import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
-import org.springframework.http.ResponseEntity;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.when;
+import org.ntt.api.cuenta.bancaria.cuenta.service.impl.CuentaServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @ExtendWith(MockitoExtension.class)
 public class CuentaTest {
-    @InjectMocks
-    CuentaController cuentaController;
 
-    @Mock
-    private CuentaService service;
+    @InjectMocks
+    private CuentaServiceImpl cuentaService;
 
     @Mock
     private CuentaRepository cuentaRepository;
 
-    @Test
-    void whenObtenerCuentaPorClienteThenNotNull(){
-        String identificacion = "1234567890";
-        ResponseEntity<?> respuesta = cuentaController.obtenerCuentaPorCliente(identificacion);
-        assertNotNull(respuesta);
-
-    }
+    @Autowired
+    private ClienteClientRest clienteClientRest;
 
     @Test
-    void whenObtenerCuentaPorClienteThenEqualsIdCliente(){
-        String identificacion = "1234567890";
-        Optional<ClienteModel> cliente = Optional.of(ClienteModel.builder().identificacion(identificacion).clienteId(1l).build());
-        when(service.obtenerClientePorIdentificacion(identificacion)).thenReturn(cliente);
+    void whenObtenerCuentaPorNumeroCunetaThenNotNull() {
+        int datosEntrada = 456789;
 
-        List<Cuenta> cuentaList = new ArrayList<>();
-        cuentaList.add(Cuenta.builder().idCliente(cliente.get().getClienteId()).idCuenta(1l).numeroCuenta(22002200).build());
+        Cuenta cuentaEsperada = Cuenta.builder().numeroCuenta(456789).idCuenta(1L).idCliente(1L).
+            tipoCuenta("Ahorros").saldoInicial(BigDecimal.valueOf(1000L)).estado("True").build();
 
-        when(service.obtenerPorCliente(cliente.get().getClienteId())).thenReturn(cuentaList);
-
-        ResponseEntity<List<Cuenta>> respuesta = (ResponseEntity<List<Cuenta>>) cuentaController.obtenerCuentaPorCliente(identificacion);
-        assertEquals(respuesta.getBody().get(0).getIdCliente(), cliente.get().getClienteId());
+        Optional<Cuenta> respuestaActual;
+        when(this.cuentaRepository.findByNumeroCuenta(datosEntrada)).thenReturn(
+            Optional.ofNullable(cuentaEsperada));
+        respuestaActual = this.cuentaService.obtenerPorNumeroCuenta(datosEntrada);
+        Assert.assertNotNull(respuestaActual);
 
     }
 }

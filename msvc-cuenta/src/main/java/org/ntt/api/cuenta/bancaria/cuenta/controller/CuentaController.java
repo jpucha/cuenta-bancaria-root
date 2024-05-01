@@ -3,20 +3,17 @@
  */
 package org.ntt.api.cuenta.bancaria.cuenta.controller;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
-import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.CuentaEntradaDto;
-import org.ntt.api.cuenta.bancaria.cuenta.enumeration.EstadoEmun;
-import org.ntt.api.cuenta.bancaria.cuenta.model.ClienteModel;
-import org.ntt.api.cuenta.bancaria.cuenta.model.entity.Cuenta;
+import java.util.HashMap;
+import java.util.Map;
+import javax.validation.Valid;
+import org.ntt.api.cuenta.bancaria.cuenta.controller.dto.entrada.CuentaEntradaDto;
 import org.ntt.api.cuenta.bancaria.cuenta.service.CuentaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.ObjectUtils;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +38,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CuentaController {
 
     private static final Logger log = LoggerFactory.getLogger(CuentaController.class);
+    private static final String ERROR_MN = "Ha ocurrido un error {}";
 
     @Autowired
     private CuentaService service;
@@ -52,51 +50,25 @@ public class CuentaController {
      * </p>
      *
      * @param cuentaEntradaDto parametro de entrada
-     * @return ResponseEntity<?> lista o mensaje de error
+     * @return ResponseEntity<?> objeto o mensaje de error
      */
     @PostMapping
-    public ResponseEntity<?> create(@Validated @RequestBody CuentaEntradaDto cuentaEntradaDto) {
+    public ResponseEntity<?> guardar(@Valid @RequestBody CuentaEntradaDto cuentaEntradaDto,
+        BindingResult resultado) {
         try {
-
-            Optional<ClienteModel> clienteEncontrado = null;
-            if (!ObjectUtils.isEmpty(cuentaEntradaDto.getIdentificacion())) {
-                clienteEncontrado = service.obtenerClientePorIdentificacion(
-                    cuentaEntradaDto.getIdentificacion());
+            if (resultado.hasErrors()) {
+                return validar(resultado);
             }
-
-            if (null != clienteEncontrado && clienteEncontrado.isPresent()) {
-                ClienteModel cliente = clienteEncontrado.get();
-                if (EstadoEmun.INACTIVO.getDescripcion().equals(cliente.getEstado())) {
-                    return new ResponseEntity<>("El cliente se encuentra inactivo.",
-                        HttpStatus.BAD_REQUEST);
-                } else {
-                    Cuenta cuenta = Cuenta.builder()
-                        .estado(EstadoEmun.ACTIVO.getDescripcion())
-                        .numeroCuenta(cuentaEntradaDto.getNumeroCuenta())
-                        .saldoInicial(BigDecimal.valueOf(cuentaEntradaDto.getSaldoInicial()))
-                        .tipoCuenta(cuentaEntradaDto.getTipoCuenta())
-                        .idCliente(clienteEncontrado.get().getClienteId()).build();
-                    Cuenta cuentaGuardada = service.create(cuenta);
-                    return new ResponseEntity<Cuenta>(cuentaGuardada, HttpStatus.CREATED);
-                }
-
-            }
-            return new ResponseEntity<>("No se encuentra registrado como cliente.",
-                HttpStatus.BAD_REQUEST);
-
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(cuentaEntradaDto));
         } catch (Exception e) {
-            log.error("Por favor comuniquese con el administrador", e);
-            if(e.getLocalizedMessage().contains("400")){
-                return new ResponseEntity<>("Cliente no encontrado.",
-                    HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            return new ResponseEntity<>(e.getLocalizedMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
         }
     }
 
     /**
-     * <b> Metodo para obtiene un cliente por su identidicacion. </b>
+     * <b> Metodo para obtener las cuentas de un cliente por su identificacion. </b>
      * <p>
      * [Author: Jenny Pucha, Date: 20 abr. 2024]
      * </p>
@@ -105,30 +77,13 @@ public class CuentaController {
      * @return ResponseEntity<?> lista o mensaje de error
      **/
     @GetMapping(path = "/{identificacion}")
-    public ResponseEntity<?> obtenerCuentaPorCliente(@PathVariable String identificacion) {
+    public ResponseEntity<?> obtenerCuentasPorCliente(@PathVariable String identificacion) {
         try {
-            Optional<ClienteModel> clienteEncontrado = null;
-            if (!ObjectUtils.isEmpty(identificacion)) {
-                clienteEncontrado = service.obtenerClientePorIdentificacion(identificacion);
-            }
-            if (!clienteEncontrado.isPresent()) {
-                return new ResponseEntity<>("No existe el cliente", HttpStatus.BAD_REQUEST);
-            }
-            List<Cuenta> listaCuenta = service.obtenerPorCliente(
-                clienteEncontrado.get().getClienteId());
-            if (null == listaCuenta || listaCuenta.isEmpty()) {
-                return new ResponseEntity<>("No existe cuenta(s) para el numero de identificacion "
-                    + clienteEncontrado.get().getIdentificacion(), HttpStatus.BAD_REQUEST);
-            } else {
-                return new ResponseEntity<List<Cuenta>>(listaCuenta, HttpStatus.OK);
-            }
-
+            return ResponseEntity.ok().body(service.obtenerCuentasPorCliente(identificacion));
         } catch (Exception e) {
-            log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>(e.getLocalizedMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
         }
-
     }
 
     /**
@@ -141,31 +96,17 @@ public class CuentaController {
      * @return ResponseEntity<?> lista o mensaje de error
      */
     @PutMapping
-    public ResponseEntity<?> update(@Validated @RequestBody CuentaEntradaDto cuentaEntradaDto) {
+    public ResponseEntity<?> actualizar(@Validated @RequestBody CuentaEntradaDto cuentaEntradaDto,
+        BindingResult resultado) {
         try {
-            if (cuentaEntradaDto.getNumeroCuenta() == 0) {
-                return new ResponseEntity<>("Numero de cuenta no puede ser vacio.",
-                    HttpStatus.BAD_REQUEST);
+            if (resultado.hasErrors()) {
+                return validar(resultado);
             }
-            Optional<Cuenta> cuenta = service.obtenerPorNumeroCuenta(
-                cuentaEntradaDto.getNumeroCuenta());
-            if (cuenta.isPresent()) {
-                Cuenta cuentaActualizar = cuenta.get();
-                cuentaActualizar.setNumeroCuenta(cuentaEntradaDto.getNumeroCuenta());
-                cuentaActualizar.setTipoCuenta(cuentaEntradaDto.getTipoCuenta());
-                cuentaActualizar
-                    .setSaldoInicial(
-                        BigDecimal.valueOf(Double.valueOf(cuentaEntradaDto.getSaldoInicial())));
-                cuentaActualizar.setEstado(cuentaEntradaDto.getEstado());
-                Cuenta cuentaGuardada = service.update(cuentaActualizar);
-                return new ResponseEntity<Cuenta>(cuentaGuardada, HttpStatus.OK);
-            }
-            return new ResponseEntity<>("La cuenta no existe.", HttpStatus.BAD_REQUEST);
-
+            return ResponseEntity.status(HttpStatus.CREATED)
+                .body(service.create(cuentaEntradaDto));
         } catch (Exception e) {
-            log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>(e.getLocalizedMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
         }
     }
 
@@ -179,22 +120,33 @@ public class CuentaController {
      * @return ResponseEntity<?> lista o mensaje de error
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable("id") Long id) {
+    public ResponseEntity<?> eliminar(@PathVariable("id") Long id) {
         try {
-            Optional<Cuenta> cuenta = service.obtenerPorId(id);
-            if (cuenta.isPresent()) {
-                service.delete(id);
-                return new ResponseEntity<>("Registro Eliminado", HttpStatus.OK);
-            }
-            return new ResponseEntity<String>(
-                "No se puede eliminar la cuenta con id: " + id + " no existe el registro",
-                HttpStatus.BAD_REQUEST);
-
+            service.delete(id);
+            return ResponseEntity.ok().body("Registro Eliminado");
         } catch (Exception e) {
-            log.error("Por favor comuniquese con el administrador", e);
-            return new ResponseEntity<>(e.getLocalizedMessage(),
-                HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(ERROR_MN, e.getCause().getMessage());
+            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
         }
+    }
+
+    /**
+     * <b> Metodo para tratar los errores de validaciones de los datos de entrada. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 19 abr. 2024]
+     * </p>
+     *
+     * @param resultado parametro de entrada
+     * @return ResponseEntity<?> lista o mensaje de error
+     */
+    private static ResponseEntity<Map<String, String>> validar(
+        BindingResult resultado) {
+        Map<String, String> errores = new HashMap<>();
+        resultado.getFieldErrors().forEach(error -> {
+            errores.put(error.getField(),
+                "El campo " + error.getField() + " " + error.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errores);
     }
 
 }
