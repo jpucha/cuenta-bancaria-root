@@ -22,7 +22,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\":\"Jose Lema\",\r\n    \"genero\":\"Masculino\",\r\n    \"edad\":\"45\",\r\n    \"identificacion\":\"1720693500\",\r\n    \"direccion\":\"Otavalo sn y principal\",\r\n    \"telefono\":\"098254785\",  \r\n    \"contrasena\":\"1234\", \r\n    \"estado\":\"True\"\r\n    \r\n}",
+							"raw": "{\r\n    \"nombre\":\"Juan Osorio\",\r\n    \"genero\":\"Masculino\",\r\n    \"edad\":\"28\",\r\n    \"identificacion\":\"1720693502\",\r\n    \"direccion\":\"13 junio y Equinoccial \",\r\n    \"telefono\":\"098874587\",  \r\n    \"contrasena\":\"1245\", \r\n    \"estado\":\"True\"\r\n    \r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -68,7 +68,7 @@
 							"raw": ""
 						},
 						"url": {
-							"raw": "http://localhost:8081/api/clientes/1720693500",
+							"raw": "http://localhost:8081/api/clientes/1720693502",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -77,7 +77,7 @@
 							"path": [
 								"api",
 								"clientes",
-								"1720693500"
+								"1720693502"
 							]
 						}
 					},
@@ -101,7 +101,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"nombre\":\"Juan Osorio\",\r\n    \"genero\":\"Masculino\",\r\n    \"edad\":\"34\",\r\n    \"identificacion\":\"1720693502\",\r\n    \"direccion\":\"13 junio y Equinoccial \",\r\n    \"telefono\":\"098874587\",  \r\n    \"contrasena\":\"1245\", \r\n    \"estado\":\"True\"\r\n\r\n}"
+							"raw": "{\r\n    \"nombre\":\"Juan Osorio\",\r\n    \"genero\":\"Masculino\",\r\n    \"edad\":\"37\",\r\n    \"identificacion\":\"1720693502\",\r\n    \"direccion\":\"13 Junio y Equinoccial OE \",\r\n    \"telefono\":\"098874588\",  \r\n    \"contrasena\":\"1245\", \r\n    \"estado\":\"True\"\r\n\r\n}"
 						},
 						"url": {
 							"raw": "http://localhost:8081/api/clientes",
@@ -124,16 +124,37 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "http://localhost:6868/api/clientes/1",
+							"raw": "http://localhost:8081/api/clientes/1720693504",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "6868",
+							"port": "8081",
 							"path": [
 								"api",
 								"clientes",
-								"1"
+								"1720693504"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Obtener todos clientes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/api/clientes/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"api",
+								"clientes",
+								""
 							]
 						}
 					},
@@ -326,7 +347,7 @@
 					"response": []
 				},
 				{
-					"name": "Movimiento obtener Identificacion y numero cuenta",
+					"name": "Obtener movimientos por numero de cuenta",
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -349,15 +370,16 @@
 							"raw": "{\r\n    \"identificacion\":\"1720987453\",\r\n    \"numeroCuenta\":\"2006789453\"\r\n}"
 						},
 						"url": {
-							"raw": "http://localhost:6868/api/movimientos",
+							"raw": "http://localhost:8082/api/movimientos/478758",
 							"protocol": "http",
 							"host": [
 								"localhost"
 							],
-							"port": "6868",
+							"port": "8082",
 							"path": [
 								"api",
-								"movimientos"
+								"movimientos",
+								"478758"
 							]
 						}
 					},
@@ -447,7 +469,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:8082/api/movimientos/reportes?identificacion=1720693502&fecha=2024-04-01,2024-04-22",
+							"raw": "http://localhost:8082/api/movimientos/reportes?identificacion=1720693501&fecha=2024-04-01,2024-04-25",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -461,33 +483,12 @@
 							"query": [
 								{
 									"key": "identificacion",
-									"value": "1720693502"
+									"value": "1720693501"
 								},
 								{
 									"key": "fecha",
-									"value": "2024-04-01,2024-04-22"
+									"value": "2024-04-01,2024-04-25"
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Obtener movimientos por numero de cuenta",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "http://localhost:8082/api/movimientos/20080313",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "8082",
-							"path": [
-								"api",
-								"movimientos",
-								"20080313"
 							]
 						}
 					},
