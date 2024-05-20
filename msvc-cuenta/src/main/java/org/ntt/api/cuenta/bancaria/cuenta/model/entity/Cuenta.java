@@ -51,7 +51,6 @@ import org.ntt.api.cuenta.bancaria.cuenta.model.ClienteModel;
 @NoArgsConstructor
 @DynamicUpdate
 @Entity
-@NamedQuery(name = "Cuenta.findAll", query = "SELECT c FROM Cuenta c")
 public class Cuenta implements Serializable {
 	private static final long serialVersionUID = 1L;
 

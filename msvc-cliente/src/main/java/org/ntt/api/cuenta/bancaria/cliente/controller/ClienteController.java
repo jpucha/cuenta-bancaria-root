@@ -1,12 +1,10 @@
-/**
- *
- */
 package org.ntt.api.cuenta.bancaria.cliente.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Valid;
 import org.ntt.api.cuenta.bancaria.cliente.controller.dto.entrada.ClienteEntradaDto;
+import org.ntt.api.cuenta.bancaria.cliente.controller.dto.salida.BaseResponseDto;
 import org.ntt.api.cuenta.bancaria.cliente.service.ClienteService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,20 +47,22 @@ public class ClienteController {
      * </p>
      *
      * @param clienteEntradaDto parametro de entrada
-     * @return ResponseEntity<?> objeto o mensaje de error
+     * @return ResponseEntity<BaseResponseDto> objeto o mensaje de error
      */
     @PostMapping
-    public ResponseEntity<?> guardar(@Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
+    public ResponseEntity<BaseResponseDto> guardar(
+        @Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
         BindingResult resultado) {
         try {
             if (resultado.hasErrors()) {
                 return validar(resultado);
             }
             return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.create(clienteEntradaDto));
+                .body(BaseResponseDto.builder().data(service.create(clienteEntradaDto)).build());
         } catch (Exception e) {
             log.error(ERROR_MN, e.getCause().getMessage());
-            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+            return ResponseEntity.internalServerError()
+                .body(BaseResponseDto.builder().message(e.getCause().getMessage()).build());
         }
     }
 
@@ -74,16 +73,17 @@ public class ClienteController {
      * </p>
      *
      * @param resultado parametro de entrada
-     * @return ResponseEntity<?> lista o mensaje de error
+     * @return ResponseEntity<BaseResponseDto> lista o mensaje de error
      */
-    private static ResponseEntity<Map<String, String>> validar(
+    private static ResponseEntity<BaseResponseDto> validar(
         BindingResult resultado) {
         Map<String, String> errores = new HashMap<>();
         resultado.getFieldErrors().forEach(error -> {
             errores.put(error.getField(),
                 "El campo " + error.getField() + " " + error.getDefaultMessage());
         });
-        return ResponseEntity.badRequest().body(errores);
+
+        return ResponseEntity.badRequest().body(BaseResponseDto.builder().data(errores).build());
     }
 
     /**
@@ -93,15 +93,19 @@ public class ClienteController {
      * </p>
      *
      * @param identificacion parametro de entrada
-     * @return ResponseEntity<?> objeto o mensaje de error
+     * @return ResponseEntity<BaseResponseDto> objeto o mensaje de error
      */
     @GetMapping(path = "/{identificacion}")
-    public ResponseEntity<?> obtenerClientePorIdentificacion(@PathVariable String identificacion) {
+    public ResponseEntity<BaseResponseDto> obtenerClientePorIdentificacion(
+        @PathVariable String identificacion) {
         try {
-            return ResponseEntity.ok().body(service.obtenerPorIdentificacion(identificacion));
+            return ResponseEntity.ok().body(
+                BaseResponseDto.builder().data(service.obtenerPorIdentificacion(identificacion))
+                    .build());
         } catch (Exception e) {
             log.error(ERROR_MN, e.getCause().getMessage());
-            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+            return ResponseEntity.internalServerError()
+                .body(BaseResponseDto.builder().message(e.getCause().getMessage()).build());
         }
     }
 
@@ -111,15 +115,16 @@ public class ClienteController {
      * [Author: Jenny Pucha, Date: 19 abr. 2024]
      * </p>
      *
-     * @return ResponseEntity<?> lista o mensaje de error
+     * @return ResponseEntity<BaseResponseDto> lista o mensaje de error
      */
     @GetMapping()
-    public ResponseEntity<?> obtenerTodosClientes() {
+    public ResponseEntity<BaseResponseDto> obtenerTodosClientes() {
         try {
-            return ResponseEntity.ok().body(service.read());
+            return ResponseEntity.ok().body(BaseResponseDto.builder().data(service.read()).build());
         } catch (Exception e) {
             log.error(ERROR_MN, e.getCause().getMessage());
-            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+            return ResponseEntity.internalServerError()
+                .body(BaseResponseDto.builder().message(e.getCause().getMessage()).build());
         }
     }
 
@@ -130,20 +135,22 @@ public class ClienteController {
      * </p>
      *
      * @param clienteEntradaDto parametro de entrada
-     * @return ResponseEntity<?> objeto o mensaje de error
+     * @return ResponseEntity<BaseResponseDto> objeto o mensaje de error
      */
     @PutMapping
-    public ResponseEntity<?> actualizar(@Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
+    public ResponseEntity<BaseResponseDto> actualizar(
+        @Valid @RequestBody ClienteEntradaDto clienteEntradaDto,
         BindingResult resultado) {
         try {
             if (resultado.hasErrors()) {
                 return validar(resultado);
             }
             return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.update(clienteEntradaDto));
+                .body(BaseResponseDto.builder().data(service.update(clienteEntradaDto)).build());
         } catch (Exception e) {
             log.error(ERROR_MN, e.getCause().getMessage());
-            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+            return ResponseEntity.internalServerError()
+                .body(BaseResponseDto.builder().message(e.getCause().getMessage()).build());
         }
     }
 
@@ -154,16 +161,19 @@ public class ClienteController {
      * </p>
      *
      * @param identificacion parametro de entrada
-     * @return ResponseEntity<?> mensaje de error
+     * @return ResponseEntity<BaseResponseDto> mensaje de error
      */
     @DeleteMapping("/{identificacion}")
-    public ResponseEntity<?> eliminar(@PathVariable("identificacion") String identificacion) {
+    public ResponseEntity<BaseResponseDto> eliminar(
+        @PathVariable("identificacion") String identificacion) {
         try {
             service.delete(identificacion);
-            return ResponseEntity.ok().body("Registro Eliminado");
+            return ResponseEntity.ok()
+                .body(BaseResponseDto.builder().message("Registro Eliminado").build());
         } catch (Exception e) {
             log.error(ERROR_MN, e.getCause().getMessage());
-            return ResponseEntity.internalServerError().body(e.getCause().getMessage());
+            return ResponseEntity.internalServerError()
+                .body(BaseResponseDto.builder().message(e.getCause().getMessage()).build());
         }
     }
 }

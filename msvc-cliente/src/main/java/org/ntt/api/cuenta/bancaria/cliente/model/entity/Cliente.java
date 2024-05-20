@@ -30,7 +30,6 @@ import org.hibernate.annotations.DynamicUpdate;
  */
 @DynamicUpdate
 @Entity
-@NamedQuery(name = "Cliente.findAll", query = "SELECT c FROM Cliente c")
 @JsonInclude(Include.NON_EMPTY)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter

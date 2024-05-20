@@ -52,7 +52,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @NoArgsConstructor
 @DynamicUpdate
 @Entity
-@NamedQuery(name = "Movimiento.findAll", query = "SELECT m FROM Movimiento m")
 public class Movimiento implements Serializable {
 	private static final long serialVersionUID = 1L;
 
