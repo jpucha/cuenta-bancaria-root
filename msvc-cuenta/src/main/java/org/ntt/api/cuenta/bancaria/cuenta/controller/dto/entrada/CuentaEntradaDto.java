@@ -39,7 +39,7 @@ public class CuentaEntradaDto {
     @NotBlank
     private String tipoCuenta;
 
-    @NotBlank
+    @NotNull
     private double saldoInicial;
 
     private String estado;

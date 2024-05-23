@@ -71,13 +71,15 @@ public interface CuentaService {
 	 **/
 	List<Cuenta> obtenerCuentasPorCliente(String identificacion) throws CuentaException;
 
+    /**
+     * <b> Metodo para obtener la cuenta dado el numero de cuenta. </b>
+     * <p>
+     * [Author: Jenny Pucha, Date: 20 abr. 2024]
+     * </p>
+     *
+     * @param numeroCuenta parametro de entrada
+     * @return la cuenta.
+     **/
 	Optional<Cuenta> obtenerPorNumeroCuenta(int numeroCuenta);
-
-	/**
-	 * Obtiene el cliente comunicandose al ws.
-	 * @param id, representa el numero de identificacion del cliente.
-	 * @return ClienteModel.
-	 **/
-	Optional<ClienteModel> obtenerClientePorIdentificacion(String id);
 
 }

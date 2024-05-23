@@ -3,7 +3,6 @@ package org.ntt.api.cuenta.bancaria.cliente;
 import static org.mockito.Mockito.when;
 import java.util.Optional;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
